@@ -1,0 +1,29 @@
+# Exemplo de configuração avançada para svndiff
+# Este arquivo demonstra cenários mais complexos
+
+# Branch de desenvolvimento principal
+branchA:
+  url: "https://svn.company.com/project/branches/development"
+  revisions:
+    - "45123"
+    - "45145"
+    - "45167"
+    - "45189"
+
+# Branch de feature específica
+branchB:
+  url: "https://svn.company.com/project/branches/feature/user-authentication"
+  revisions:
+    - "45200"
+    - "45225"
+
+# Mostrar diff completo em vez de apenas lista
+output: "diff"
+summarize: false
+
+# Credenciais para repositório corporativo
+auth:
+  user: "developer"
+  # Note: em produção, considere usar variáveis de ambiente
+  # para credenciais sensíveis em vez de hardcode no arquivo
+  password: "${SVNDIFF_PASSWORD}"
