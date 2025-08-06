@@ -6,7 +6,9 @@ on:
             - 'v*'
 
 env:
-  GO_VERSION: '1.23'jobs:
+  GO_VERSION: '1.22'
+
+jobs:
     release:
         name: Create Release
         runs-on: ubuntu-latest
