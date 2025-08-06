@@ -1,0 +1,59 @@
+run:
+    timeout: 10m
+    issues-exit-code: 1
+    tests: true
+
+linters:
+    enable:
+        - gofmt
+        - goimports
+        - govet
+        - errcheck
+        - staticcheck
+        - ineffassign
+        - typecheck
+
+    disable:
+        - misspell # Desabilitado por causa de comentários em português
+        - gofumpt # Desabilitado devido a inconsistências entre versões
+        - unconvert # Desabilitado para reduzir complexidade
+
+linters-settings:
+    govet:
+        enable-all: false
+        enable:
+            - assign
+            - atomic
+            - bools
+            - buildtag
+            - copylocks
+            - errorsas
+            - httpresponse
+            - loopclosure
+            - lostcancel
+            - nilfunc
+            - printf
+            - shift
+            - structtag
+            - tests
+            - unmarshal
+            - unreachable
+            - unsafeptr
+            - unusedresult
+    gofmt:
+        simplify: true
+    goimports:
+        local-prefixes: svndiff
+
+issues:
+    max-issues-per-linter: 0
+    max-same-issues: 0
+
+    exclude-dirs:
+        - vendor
+        - tmp
+
+    exclude-rules:
+        - path: _test\.go
+          linters:
+              - errcheck
