@@ -74,9 +74,6 @@ linters:
         - staticcheck
         - typecheck
         - unused
-        - varcheck
-        - structcheck
-        - deadcode
         - gocyclo
         - gofmt
         - goimports
@@ -96,11 +93,8 @@ linters:
         - unconvert
         - unparam
         - whitespace
-
-    disable:
-        - maligned # deprecated
-        - interfacer # deprecated
-        - scopelint # deprecated
+    # Removidos: varcheck, structcheck, deadcode, maligned, interfacer, scopelint (deprecated)
+    disable: []
 
 issues:
     exclude-rules:
