@@ -32,7 +32,6 @@ config-local.yaml
 
 # Build output
 dist/
-build/
 coverage/
 tmp/
 
