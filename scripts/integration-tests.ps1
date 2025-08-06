@@ -102,6 +102,6 @@ Write-Host ""
 Write-Host "🎉 Todos os testes de integração passaram!" -ForegroundColor Green
 Write-Host "📋 Resumo dos testes:" -ForegroundColor Cyan
 Write-Host "  ✅ Comando de ajuda" -ForegroundColor Green
-Write-Host "  ✅ Comando de versão" -ForegroundColor Green  
+Write-Host "  ✅ Comando de versão" -ForegroundColor Green
 Write-Host "  ✅ Tratamento de erro de conectividade" -ForegroundColor Green
 Write-Host "  ✅ Carregamento de arquivo de configuração" -ForegroundColor Green

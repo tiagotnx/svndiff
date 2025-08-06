@@ -7,24 +7,29 @@ O pipeline GitHub Actions estava falhando no **"Teste 2: Verificando validação
 ## 🔍 Análise Realizada
 
 ### 1. **Estrutura de Comandos Incorreta**
-- ❌ Scripts testavam comando `compare` inexistente
-- ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
+
+-   ❌ Scripts testavam comando `compare` inexistente
+-   ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
 
 ### 2. **Conflito de Arquivo de Configuração**
-- ❌ Arquivo `config.yaml` local interferia nos testes
-- ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
+
+-   ❌ Arquivo `config.yaml` local interferia nos testes
+-   ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
 
 ### 3. **Falta de Debug nos Testes**
-- ❌ Scripts falhavam sem informações detalhadas
-- ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
+
+-   ❌ Scripts falhavam sem informações detalhadas
+-   ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
 
 ### 4. **Mapeamento Incorreto de Configuração**
-- ❌ Estrutura YAML dos testes não combinava com a esperada
-- ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
+
+-   ❌ Estrutura YAML dos testes não combinava com a esperada
+-   ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
 
 ## ✅ Correções Implementadas
 
 ### **1. Script Bash (`integration-tests.sh`)**
+
 ```bash
 # Melhor tratamento de erros
 set -euo pipefail
@@ -40,37 +45,41 @@ echo "🐛 Debug: Exit code = $exit_code"
 ```
 
 ### **2. Workflow GitHub Actions**
+
 ```yaml
 - name: Executar testes de integração
   run: |
-    set -x
-    echo "📋 Preparando testes de integração..."
-    ls -la scripts/
-    chmod +x scripts/integration-tests.sh
-    echo "📋 Executando testes..."
-    ./scripts/integration-tests.sh
+      set -x
+      echo "📋 Preparando testes de integração..."
+      ls -la scripts/
+      chmod +x scripts/integration-tests.sh
+      echo "📋 Executando testes..."
+      ./scripts/integration-tests.sh
 ```
 
 ### **3. Gerenciamento de Configuração**
-- **Arquivo de exemplo**: `config.yaml.example` para referência
-- **Gitignore atualizado**: `config.yaml` ignorado para evitar conflitos
-- **Isolamento de testes**: Testes não dependem de arquivos locais
+
+-   **Arquivo de exemplo**: `config.yaml.example` para referência
+-   **Gitignore atualizado**: `config.yaml` ignorado para evitar conflitos
+-   **Isolamento de testes**: Testes não dependem de arquivos locais
 
 ### **4. Estrutura YAML Correta**
+
 ```yaml
 # Antes (incorreto)
 branchA:
-  url: "..."
-  revisions: ["123"]
+    url: '...'
+    revisions: ['123']
 
-# Depois (correto)  
-urlA: "..."
-revsA: ["123"]
+# Depois (correto)
+urlA: '...'
+revsA: ['123']
 ```
 
 ## 🧪 Validação das Correções
 
 ### **Testes Locais - PowerShell**
+
 ```
 ✅ SVN está disponível: 1.14.3
 ✅ Aplicação compilada com sucesso
@@ -82,6 +91,7 @@ revsA: ["123"]
 ```
 
 ### **Validação Manual**
+
 ```bash
 # Teste de validação confirmado
 $ ./build/svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124"
@@ -92,25 +102,28 @@ Error: configuração inválida: URL da Branch A é obrigatória
 ## 📋 Resumo das Mudanças
 
 ### **Arquivos Modificados**
+
 1. `scripts/integration-tests.sh` - Debug e correção de comandos
 2. `.github/workflows/ci-cd.yml` - Melhor logging no CI
-3. `.gitignore` - Ignorar `config.yaml` 
+3. `.gitignore` - Ignorar `config.yaml`
 4. `config.yaml` → `config.yaml.example` - Evitar conflitos
 
 ### **Melhorias Implementadas**
-- 🔍 **Debug detalhado** em todas as etapas
-- 🛡️ **Isolamento de testes** (sem dependências locais)
-- 📝 **Logging aprimorado** no CI/CD
-- ✅ **Validação robusta** de configuração
-- 🎯 **Estrutura de comandos correta**
+
+-   🔍 **Debug detalhado** em todas as etapas
+-   🛡️ **Isolamento de testes** (sem dependências locais)
+-   📝 **Logging aprimorado** no CI/CD
+-   ✅ **Validação robusta** de configuração
+-   🎯 **Estrutura de comandos correta**
 
 ## 🚀 Resultado
 
 O pipeline CI/CD agora deve executar com sucesso, fornecendo:
-- ✅ Testes de integração funcionais
-- 🔍 Debug claro em caso de falhas
-- 📊 Feedback detalhado para troubleshooting
-- 🛡️ Isolamento de configuração local
+
+-   ✅ Testes de integração funcionais
+-   🔍 Debug claro em caso de falhas
+-   📊 Feedback detalhado para troubleshooting
+-   🛡️ Isolamento de configuração local
 
 ---
 
