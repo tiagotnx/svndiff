@@ -61,12 +61,10 @@ set -e  # Reabilitar set -e
 
 ### 7. **Sintaxe de Secrets Inválida**
 
--   ❌ Uso de `secrets.DOCKER_USERNAME` em condição `if` de job
--   ✅ Condições `if` movidas para steps individuais que precisam dos secrets
+-   ❌ Uso de `secrets.DOCKER_USERNAME` em condições `if` (sintaxe inválida no GitHub Actions)
+-   ✅ Removidas condições `if` e adicionado `continue-on-error: true` nos steps Docker
 
-### 8. **Estrutura YAML Correta**
-
-### **1. Script Bash (`integration-tests.sh`)**
+## ✅ Correções Implementadas
 
 ```bash
 # Melhor tratamento de erros
@@ -170,27 +168,26 @@ urlA: '...'
 revsA: ['123']
 ```
 
-### **7. Correção de Sintaxe de Secrets**
+### **7. Correção de Sintaxe de Secrets (Final)**
 
 ```yaml
-# ❌ ANTES - Sintaxe inválida para secrets em condição if de job
-docker:
-    if: github.event_name != 'pull_request' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+# ❌ ANTES - Sintaxe inválida em condições if
+- name: Login no Docker Hub
+  if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
+  uses: docker/login-action@v3
 
-# ✅ DEPOIS - Condições if nos steps específicos
-docker:
-    if: github.event_name != 'pull_request'
-    steps:
-        - name: Login no Docker Hub
-          if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
-          uses: docker/login-action@v3
-        
-        - name: Build e push imagem Docker
-          if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
-          uses: docker/build-push-action@v5
-```
+# ✅ DEPOIS - Uso de continue-on-error para falha graciosa
+- name: Login no Docker Hub
+  uses: docker/login-action@v3
+  with:
+      username: ${{ secrets.DOCKER_USERNAME }}
+      password: ${{ secrets.DOCKER_PASSWORD }}
+  continue-on-error: true
 
-## 🧪 Validação das Correções
+- name: Build e push imagem Docker
+  uses: docker/build-push-action@v5
+  continue-on-error: true
+```## 🧪 Validação das Correções
 
 ### **Testes Locais - PowerShell**
 
