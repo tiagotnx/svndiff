@@ -18,11 +18,23 @@ var (
 	cfg     config.Config
 )
 
+// Variáveis de build injetadas em tempo de compilação
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
+)
+
+// getVersion retorna informações de versão formatadas
+func getVersion() string {
+	return fmt.Sprintf("%s (commit: %s, built: %s)", version, commit, date)
+}
+
 // rootCmd representa o comando base quando chamado sem subcomandos
 var rootCmd = &cobra.Command{
 	Use:   "svndiff",
 	Short: "Compara revisões entre duas branches SVN",
-	Long: `svndiff é uma ferramenta CLI que compara um conjunto de revisões 
+	Long: `svndiff é uma ferramenta CLI que compara um conjunto de revisões
 de uma branch SVN com um conjunto de revisões de outra branch.
 
 A ferramenta suporta configuração via arquivo YAML e argumentos de linha de comando,
@@ -31,6 +43,7 @@ onde os argumentos sempre têm precedência sobre as configurações do arquivo.
 Exemplo de uso:
   svndiff --config config.yaml
   svndiff --urlA https://svn.example.com/branchA --revsA 123,124 --urlB https://svn.example.com/branchB --revsB 125 --output diff`,
+	Version: getVersion(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Carrega a configuração do Viper para a struct
 		if err := viper.Unmarshal(&cfg); err != nil {

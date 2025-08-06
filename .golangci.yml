@@ -1,0 +1,129 @@
+# Configuração do golangci-lint para o projeto svndiff
+# Versão: 1.54.2
+
+run:
+    timeout: 5m
+    issues-exit-code: 1
+    tests: true
+    skip-dirs:
+        - vendor
+    skip-files:
+        - ".*\\.pb\\.go$"
+        - ".*_gen\\.go$"
+
+output:
+    format: colored-line-number
+    print-issued-lines: true
+    print-linter-name: true
+
+linters-settings:
+    errcheck:
+        check-type-assertions: true
+        check-blank: true
+
+    govet:
+        check-shadowing: true
+        enable-all: true
+        disable:
+            - fieldalignment # muito verboso
+
+    gocyclo:
+        min-complexity: 15
+
+    maligned:
+        suggest-new: true
+
+    dupl:
+        threshold: 100
+
+    goconst:
+        min-len: 3
+        min-occurrences: 3
+
+    misspell:
+        locale: US
+
+    lll:
+        line-length: 120
+
+    goimports:
+        local-prefixes: svndiff
+
+    gocritic:
+        enabled-tags:
+            - performance
+            - style
+            - experimental
+        disabled-checks:
+            - wrapperFunc
+            - dupImport
+
+    funlen:
+        lines: 100
+        statements: 50
+
+    gocognit:
+        min-complexity: 20
+
+linters:
+    enable:
+        - errcheck
+        - gosimple
+        - govet
+        - ineffassign
+        - staticcheck
+        - typecheck
+        - unused
+        - varcheck
+        - structcheck
+        - deadcode
+        - gocyclo
+        - gofmt
+        - goimports
+        - misspell
+        - lll
+        - goconst
+        - gocritic
+        - gocognit
+        - funlen
+        - dupl
+        - goheader
+        - goprintffuncname
+        - gosec
+        - noctx
+        - rowserrcheck
+        - sqlclosecheck
+        - unconvert
+        - unparam
+        - whitespace
+
+    disable:
+        - maligned # deprecated
+        - interfacer # deprecated
+        - scopelint # deprecated
+
+issues:
+    exclude-rules:
+        # Exclude some linters from running on tests files
+        - path: _test\.go
+          linters:
+              - gocyclo
+              - errcheck
+              - dupl
+              - gosec
+              - funlen
+              - gocognit
+
+        # Exclude lll issues for long lines with go:generate
+        - linters:
+              - lll
+          source: '^//go:generate '
+
+        # Exclude shadow warnings in type switches
+        - linters:
+              - govet
+          text: 'shadow: declaration of "err"'
+
+    exclude-use-default: false
+    max-issues-per-linter: 0
+    max-same-issues: 0

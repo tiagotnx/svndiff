@@ -1,0 +1,120 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*'
+
+env:
+    GO_VERSION: '1.21'
+
+jobs:
+    release:
+        name: Create Release
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Configurar Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: ${{ env.GO_VERSION }}
+
+            - name: Instalar dependências de build
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y upx-ucl
+
+            - name: Build para múltiplas plataformas
+              run: |
+                  mkdir -p dist
+
+                  # Definir plataformas
+                  platforms=(
+                    "linux/amd64"
+                    "linux/arm64"
+                    "windows/amd64"
+                    "darwin/amd64"
+                    "darwin/arm64"
+                  )
+
+                  for platform in "${platforms[@]}"; do
+                    IFS='/' read -r GOOS GOARCH <<< "$platform"
+
+                    BINARY_NAME=svndiff
+                    if [ "$GOOS" = "windows" ]; then
+                      BINARY_NAME=svndiff.exe
+                    fi
+
+                    echo "Building for $GOOS/$GOARCH..."
+
+                    CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH go build \
+                      -ldflags="-s -w -X main.version=${GITHUB_REF#refs/tags/} -X main.commit=${GITHUB_SHA} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                      -o dist/${BINARY_NAME} .
+
+                    # Comprimir binário (exceto para macOS por causa do codesigning)
+                    if [ "$GOOS" != "darwin" ]; then
+                      upx --best --lzma dist/${BINARY_NAME} || true
+                    fi
+
+                    # Criar arquivo comprimido
+                    if [ "$GOOS" = "windows" ]; then
+                      zip -j dist/svndiff-${GOOS}-${GOARCH}.zip dist/${BINARY_NAME}
+                    else
+                      tar -czf dist/svndiff-${GOOS}-${GOARCH}.tar.gz -C dist ${BINARY_NAME}
+                    fi
+
+                    rm dist/${BINARY_NAME}
+                  done
+
+            - name: Gerar checksums
+              run: |
+                  cd dist
+                  sha256sum * > checksums.sha256
+
+            - name: Extrair release notes
+              id: extract_notes
+              run: |
+                  VERSION=${GITHUB_REF#refs/tags/}
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+                  # Tentar extrair release notes do CHANGELOG.md
+                  if [ -f CHANGELOG.md ]; then
+                    # Extrair seção para esta versão
+                    awk "/^## \[$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > release_notes.md
+
+                    if [ -s release_notes.md ]; then
+                      echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+                    else
+                      echo "No release notes found for $VERSION, generating default"
+                      echo "Release $VERSION" > release_notes.md
+                      echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+                    fi
+                  else
+                    echo "Release $VERSION" > release_notes.md
+                    echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Criar GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  name: Release ${{ steps.extract_notes.outputs.version }}
+                  body_path: ${{ steps.extract_notes.outputs.notes_file }}
+                  files: |
+                      dist/*.zip
+                      dist/*.tar.gz
+                      dist/checksums.sha256
+                  draft: false
+                  prerelease: ${{ contains(github.ref, '-') }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Update Homebrew formula
+              if: ${{ !contains(github.ref, '-') }}
+              run: |
+                  echo "🍺 Homebrew formula update would go here"
+                  # Implementar atualização do Homebrew se necessário

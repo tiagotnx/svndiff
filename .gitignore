@@ -32,3 +32,30 @@ config-local.yaml
 # Build output
 dist/
 build/
+coverage/
+tmp/
+
+# Logs
+*.log
+build-errors.log
+
+# Docker
+.docker/
+
+# Air
+.air.toml.bak
+
+# Test artifacts
+*.test
+*.prof
+
+# Coverage reports
+coverage.html
+coverage.txt
+
+# Security scan results
+gosec-report.json
+
+# Release artifacts
+checksums.sha256
+release_notes.md

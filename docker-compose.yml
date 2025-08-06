@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+    # Serviço de desenvolvimento com hot reload
+    svndiff-dev:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: svndiff-dev
+        volumes:
+            - .:/app
+            - go-cache:/go/pkg/mod
+        working_dir: /app
+        ports:
+            - '8080:8080'
+        environment:
+            - CGO_ENABLED=0
+            - GOOS=linux
+        command: air -c .air.toml
+        networks:
+            - svndiff-network
+
+    # Serviço de produção
+    svndiff-prod:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: svndiff-prod
+        volumes:
+            - ./config.yaml:/home/svndiff/config.yaml:ro
+        environment:
+            - SVNDIFF_OUTPUT=json
+        networks:
+            - svndiff-network
+        profiles:
+            - production
+
+    # Serviço para executar testes
+    svndiff-test:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: svndiff-test
+        volumes:
+            - .:/app
+            - go-cache:/go/pkg/mod
+        working_dir: /app
+        command: go test -v -race -cover ./...
+        networks:
+            - svndiff-network
+        profiles:
+            - test
+
+volumes:
+    go-cache:
+
+networks:
+    svndiff-network:
+        driver: bridge

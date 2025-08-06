@@ -1,0 +1,244 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches: [main, develop]
+        tags: ['v*']
+    pull_request:
+        branches: [main, develop]
+
+env:
+    GO_VERSION: '1.21'
+    GOLANGCI_LINT_VERSION: 'v1.54.2'
+
+jobs:
+    # Job de Lint e Testes
+    test:
+        name: Test and Lint
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+
+            - name: Configurar Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: ${{ env.GO_VERSION }}
+
+            - name: Cache Go modules
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.cache/go-build
+                      ~/go/pkg/mod
+                  key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+                  restore-keys: |
+                      ${{ runner.os }}-go-
+
+            - name: Baixar dependências
+              run: go mod download
+
+            - name: Verificar go mod
+              run: |
+                  go mod tidy
+                  git diff --exit-code go.mod go.sum
+
+            - name: Verificar formatação
+              run: |
+                  if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+                    echo "Código não está formatado:"
+                    gofmt -s -l .
+                    exit 1
+                  fi
+
+            - name: Executar go vet
+              run: go vet ./...
+
+            - name: Instalar golangci-lint
+              run: |
+                  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
+
+            - name: Executar golangci-lint
+              run: golangci-lint run
+
+            - name: Executar testes unitários
+              run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+            - name: Upload cobertura para Codecov
+              uses: codecov/codecov-action@v3
+              with:
+                  file: ./coverage.out
+                  flags: unittests
+                  name: codecov-umbrella
+
+            - name: Executar testes de integração
+              run: |
+                  chmod +x scripts/integration-tests.sh
+                  ./scripts/integration-tests.sh
+
+    # Job de Build Multi-plataforma
+    build:
+        name: Build Multi-platform
+        runs-on: ubuntu-latest
+        needs: test
+
+        strategy:
+            matrix:
+                goos: [linux, windows, darwin]
+                goarch: [amd64, arm64]
+                exclude:
+                    - goos: windows
+                      goarch: arm64
+
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+
+            - name: Configurar Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: ${{ env.GO_VERSION }}
+
+            - name: Cache Go modules
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.cache/go-build
+                      ~/go/pkg/mod
+                  key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+                  restore-keys: |
+                      ${{ runner.os }}-go-
+
+            - name: Build binário
+              run: |
+                  mkdir -p dist
+                  BINARY_NAME=svndiff
+                  if [ "${{ matrix.goos }}" = "windows" ]; then
+                    BINARY_NAME=svndiff.exe
+                  fi
+                  GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w" -o dist/${BINARY_NAME}-${{ matrix.goos }}-${{ matrix.goarch }} .
+
+            - name: Upload artefatos
+              uses: actions/upload-artifact@v3
+              with:
+                  name: svndiff-${{ matrix.goos }}-${{ matrix.goarch }}
+                  path: dist/
+
+    # Job de Build Docker
+    docker:
+        name: Build Docker Images
+        runs-on: ubuntu-latest
+        needs: test
+        if: github.event_name != 'pull_request'
+
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+
+            - name: Configurar Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login no Docker Hub
+              if: github.event_name != 'pull_request'
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Extrair metadados
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: |
+                      ${{ secrets.DOCKER_USERNAME }}/svndiff
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}.{{minor}}
+                      type=raw,value=latest,enable={{is_default_branch}}
+
+            - name: Build e push imagem Docker
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  platforms: linux/amd64,linux/arm64
+                  push: ${{ github.event_name != 'pull_request' }}
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+    # Job de Release
+    release:
+        name: Create Release
+        runs-on: ubuntu-latest
+        needs: [test, build]
+        if: startsWith(github.ref, 'refs/tags/v')
+
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Download todos os artefatos
+              uses: actions/download-artifact@v3
+              with:
+                  path: dist/
+
+            - name: Preparar assets para release
+              run: |
+                  mkdir -p release/
+                  cd dist/
+                  for dir in */; do
+                    cd "$dir"
+                    for file in *; do
+                      if [[ $file == *"windows"* ]]; then
+                        zip "../../release/${file%.exe}.zip" "$file"
+                      else
+                        tar -czf "../../release/${file}.tar.gz" "$file"
+                      fi
+                    done
+                    cd ..
+                  done
+
+            - name: Gerar changelog
+              id: changelog
+              run: |
+                  if [ -f CHANGELOG.md ]; then
+                    echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                    cat CHANGELOG.md >> $GITHUB_OUTPUT
+                    echo "EOF" >> $GITHUB_OUTPUT
+                  else
+                    echo "changelog=Automated release for ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Criar Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: release/*
+                  body: ${{ steps.changelog.outputs.changelog }}
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Job de Notificação
+    notify:
+        name: Notify
+        runs-on: ubuntu-latest
+        needs: [test, build, docker]
+        if: always()
+
+        steps:
+            - name: Notificar sucesso
+              if: ${{ needs.test.result == 'success' && needs.build.result == 'success' }}
+              run: echo "✅ Pipeline executado com sucesso!"
+
+            - name: Notificar falha
+              if: ${{ needs.test.result == 'failure' || needs.build.result == 'failure' }}
+              run: |
+                  echo "❌ Pipeline falhou!"
+                  exit 1
