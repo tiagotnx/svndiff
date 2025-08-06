@@ -170,7 +170,7 @@ revsA: ['123']
 
 ### **7. Correção de Sintaxe de Secrets (Final)**
 
-```yaml
+````yaml
 # ❌ ANTES - Sintaxe inválida em condições if
 - name: Login no Docker Hub
   if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
@@ -191,7 +191,8 @@ revsA: ['123']
 
 ### **Testes Locais - PowerShell**
 
-```
+````
+
 ✅ SVN está disponível: 1.14.3
 ✅ Aplicação compilada com sucesso
 ✅ Comando de ajuda funcionou
@@ -199,7 +200,8 @@ revsA: ['123']
 ✅ Tratamento de erro funcionou corretamente
 ✅ Carregamento de arquivo de configuração funcionou
 🎉 Todos os testes de integração passaram!
-```
+
+````
 
 ### **Validação Manual**
 
@@ -208,7 +210,7 @@ revsA: ['123']
 $ ./build/svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124"
 Error: configuração inválida: URL da Branch A é obrigatória
 # Exit code: 1 ✅
-```
+````
 
 ## 📋 Resumo das Mudanças
 
