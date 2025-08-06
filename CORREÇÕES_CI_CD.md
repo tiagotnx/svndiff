@@ -11,6 +11,12 @@ $ .\build\svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124"
 Error: configuração inválida: URL da Branch A é obrigatória
 Exit code: 1  # ✅ CORRETO!
 
+# ✅ Correção no script bash - captura correta do exit code
+set +e  # Temporariamente desabilitar set -e
+./build/svndiff --urlA "" --urlB "test" --revsA "123" --revsB "124" > /tmp/test_output 2>&1
+exit_code=$?  # Captura o exit code REAL (não mascarado por || true)
+set -e  # Reabilitar set -e
+
 # ✅ Todos os testes passando
 🎉 Todos os testes de integração passaram!
   ✅ Comando de ajuda
@@ -23,24 +29,24 @@ Exit code: 1  # ✅ CORRETO!
 ## 🔍 Análise Realizada
 
 ### 1. **Estrutura de Comandos Incorreta**
+- ❌ Scripts testavam comando `compare` inexistente
+- ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
 
--   ❌ Scripts testavam comando `compare` inexistente
--   ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
+### 2. **Exit Codes Mascarados no Bash**
+- ❌ `|| true` no bash mascarava exit codes reais (sempre retornava 0)
+- ✅ Uso de `set +e/set -e` para capturar exit codes corretos
 
-### 2. **Conflito de Arquivo de Configuração**
+### 3. **Conflito de Arquivo de Configuração**
+- ❌ Arquivo `config.yaml` local interferia nos testes
+- ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
 
--   ❌ Arquivo `config.yaml` local interferia nos testes
--   ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
+### 4. **Falta de Debug nos Testes**
+- ❌ Scripts falhavam sem informações detalhadas
+- ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
 
-### 3. **Falta de Debug nos Testes**
-
--   ❌ Scripts falhavam sem informações detalhadas
--   ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
-
-### 4. **Mapeamento Incorreto de Configuração**
-
--   ❌ Estrutura YAML dos testes não combinava com a esperada
--   ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
+### 5. **Mapeamento Incorreto de Configuração**
+- ❌ Estrutura YAML dos testes não combinava com a esperada
+- ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
 
 ## ✅ Correções Implementadas
 
@@ -54,9 +60,12 @@ set -euo pipefail
 echo "🐛 Debug: PWD=$(pwd)"
 echo "🐛 Debug: GO_VERSION=$(go version)"
 
-# Teste de validação corrigido
-output=$(./build/svndiff --urlA "" --urlB "test" --revsA "123" --revsB "124" 2>&1 || true)
-exit_code=$?
+# Teste de validação corrigido - captura REAL do exit code
+set +e  # Temporariamente desabilitar set -e
+./build/svndiff --urlA "" --urlB "test" --revsA "123" --revsB "124" > /tmp/test_output 2>&1
+exit_code=$?  # Captura o exit code REAL (não mascarado por || true)
+output=$(cat /tmp/test_output)
+set -e  # Reabilitar set -e
 echo "🐛 Debug: Exit code = $exit_code"
 ```
 
