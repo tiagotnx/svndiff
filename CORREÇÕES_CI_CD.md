@@ -59,6 +59,11 @@ set -e  # Reabilitar set -e
 -   ❌ Pipeline falhava no login Docker: "Username and password required"
 -   ✅ Job Docker tornado condicional baseado na existência dos secrets
 
+### 7. **Actions Deprecadas**
+
+-   ❌ Uso de `actions/upload-artifact@v3` e `actions/download-artifact@v3` (deprecadas)
+-   ✅ Atualizadas para `@v4` (suportadas pelo GitHub)
+
 ## ✅ Correções Implementadas
 
 ### **1. Script Bash (`integration-tests.sh`)**
@@ -116,6 +121,7 @@ $output = & .\build\svndiff.exe --urlA "https://invalid.example.com/svn" --urlB 
 -   **Isolamento de testes**: Testes não dependem de arquivos locais
 
 ### **4. Job Docker Condicional**
+
 ```yaml
 # Job Docker tornado condicional para evitar falhas por secrets ausentes
 docker:
@@ -124,16 +130,33 @@ docker:
     needs: test
     # ✅ Só executa se os secrets existirem
     if: github.event_name != 'pull_request' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
-    
+
     steps:
-      - name: Login no Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Login no Docker Hub
+          uses: docker/login-action@v3
+          with:
+              username: ${{ secrets.DOCKER_USERNAME }}
+              password: ${{ secrets.DOCKER_PASSWORD }}
 ```
 
-### **5. Estrutura YAML Correta**
+### **5. Actions GitHub Atualizadas**
+```yaml
+# ❌ ANTES - Actions deprecadas (removidas em abril 2024)
+- name: Upload artefatos
+  uses: actions/upload-artifact@v3
+  
+- name: Download todos os artefatos  
+  uses: actions/download-artifact@v3
+
+# ✅ DEPOIS - Actions atuais e suportadas
+- name: Upload artefatos
+  uses: actions/upload-artifact@v4
+  
+- name: Download todos os artefatos
+  uses: actions/download-artifact@v4
+```
+
+### **6. Estrutura YAML Correta**
 
 ```yaml
 # Antes (incorreto)
@@ -202,9 +225,9 @@ O pipeline CI/CD agora deve executar com sucesso, fornecendo:
 1. **Monitorar execução** do pipeline GitHub Actions
 2. **Verificar logs** detalhados se houver falhas
 3. **Configurar secrets Docker** (opcional):
-   - Ir para Repositório → Settings → Secrets and variables → Actions
-   - Adicionar `DOCKER_USERNAME` com seu usuário Docker Hub
-   - Adicionar `DOCKER_PASSWORD` com sua senha/token Docker Hub
+    - Ir para Repositório → Settings → Secrets and variables → Actions
+    - Adicionar `DOCKER_USERNAME` com seu usuário Docker Hub
+    - Adicionar `DOCKER_PASSWORD` com sua senha/token Docker Hub
 4. **Ajustar timeouts** se necessário para SVN
 5. **Otimizar performance** dos testes se possível
 

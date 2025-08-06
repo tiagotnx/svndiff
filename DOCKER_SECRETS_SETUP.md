@@ -3,6 +3,7 @@
 ## 📋 **Problema Identificado**
 
 O pipeline GitHub Actions falha no job Docker com o erro:
+
 ```
 Username and password required
 ```
@@ -39,14 +40,16 @@ docker:
 Clique em **"New repository secret"** e adicione:
 
 #### **DOCKER_USERNAME**
-- **Name**: `DOCKER_USERNAME`
-- **Secret**: Seu nome de usuário do Docker Hub
-- Exemplo: `meuusuario`
+
+-   **Name**: `DOCKER_USERNAME`
+-   **Secret**: Seu nome de usuário do Docker Hub
+-   Exemplo: `meuusuario`
 
 #### **DOCKER_PASSWORD**
-- **Name**: `DOCKER_PASSWORD`  
-- **Secret**: Sua senha ou token do Docker Hub
-- **Recomendação**: Use um Access Token em vez da senha
+
+-   **Name**: `DOCKER_PASSWORD`
+-   **Secret**: Sua senha ou token do Docker Hub
+-   **Recomendação**: Use um Access Token em vez da senha
 
 ### **Passo 3: Criar Token Docker Hub (Recomendado)**
 
@@ -60,16 +63,18 @@ Clique em **"New repository secret"** e adicione:
 ## 🚀 **Comportamento do Pipeline**
 
 ### **Com Secrets Configurados**
-- ✅ Job de testes executa normalmente
-- ✅ Job de build executa normalmente  
-- ✅ Job Docker executa: faz login, build e push da imagem
-- ✅ Job de release executa (se for uma tag)
+
+-   ✅ Job de testes executa normalmente
+-   ✅ Job de build executa normalmente
+-   ✅ Job Docker executa: faz login, build e push da imagem
+-   ✅ Job de release executa (se for uma tag)
 
 ### **Sem Secrets Configurados**
-- ✅ Job de testes executa normalmente
-- ✅ Job de build executa normalmente
-- ⏭️ Job Docker é **pulado automaticamente**
-- ✅ Job de release executa (se for uma tag)
+
+-   ✅ Job de testes executa normalmente
+-   ✅ Job de build executa normalmente
+-   ⏭️ Job Docker é **pulado automaticamente**
+-   ✅ Job de release executa (se for uma tag)
 
 ## 📊 **Vantagens da Abordagem**
 
@@ -87,21 +92,23 @@ Para verificar se os secrets estão funcionando, observe os logs do job Docker:
 - name: Login no Docker Hub
   uses: docker/login-action@v3
   with:
-    username: ${{ secrets.DOCKER_USERNAME }}
-    password: ${{ secrets.DOCKER_PASSWORD }}
+      username: ${{ secrets.DOCKER_USERNAME }}
+      password: ${{ secrets.DOCKER_PASSWORD }}
 ```
 
 ### **Logs Esperados**
 
-**Com secrets**: 
+**Com secrets**:
+
 ```
 Login no Docker Hub
 ✓ Login succeeded
 ```
 
 **Sem secrets**:
+
 ```
-Job Docker pulado devido à condição: 
+Job Docker pulado devido à condição:
 secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
 ```
 
@@ -109,9 +116,9 @@ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
 
 ## 📋 **Resumo**
 
-- **Problema**: Secrets Docker ausentes causavam falha no pipeline
-- **Solução**: Job Docker tornado condicional  
-- **Resultado**: Pipeline funciona com ou sem secrets Docker
-- **Benefício**: Funcionalidade core sempre disponível, Docker é enhancement opcional
+-   **Problema**: Secrets Docker ausentes causavam falha no pipeline
+-   **Solução**: Job Docker tornado condicional
+-   **Resultado**: Pipeline funciona com ou sem secrets Docker
+-   **Benefício**: Funcionalidade core sempre disponível, Docker é enhancement opcional
 
 **Status**: ✅ **Pipeline robusto e flexível implementado**
