@@ -62,10 +62,23 @@ if ($LASTEXITCODE -eq 0 -and $output -match "svndiff") {
     exit 1
 }
 
+# Teste 3: Verificar validação de configuração
+Write-Host ""
+Write-Host "📋 Teste 3: Validação de configuração" -ForegroundColor Cyan
+$output = & .\build\svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "✅ Validação de configuração funcionou corretamente" -ForegroundColor Green
+} else {
+    Write-Host "❌ Validação de configuração falhou - deveria ter retornado erro" -ForegroundColor Red
+    Write-Host "Exit code: $LASTEXITCODE" -ForegroundColor Red
+    Write-Host "Saída: $output" -ForegroundColor Red
+    exit 1
+}
+
 # Teste 3: Tratamento de erro com URL inválida
 Write-Host ""
-Write-Host "📋 Teste 3: Tratamento de erro de conectividade" -ForegroundColor Cyan
-$output = & .\build\svndiff.exe compare --repo-url "svn://invalid-url" --branch1 "branch1" --branch2 "branch2" 2>&1
+Write-Host "📋 Teste 4: Tratamento de erro de conectividade" -ForegroundColor Cyan
+$output = & .\build\svndiff.exe --urlA "https://invalid.example.com/svn" --urlB "https://invalid.example.com/svn2" --revsA "123" --revsB "124" 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "✅ Tratamento de erro funcionou corretamente" -ForegroundColor Green
 } else {
@@ -76,16 +89,20 @@ if ($LASTEXITCODE -ne 0) {
 
 # Teste 4: Carregamento de arquivo de configuração
 Write-Host ""
-Write-Host "📋 Teste 4: Carregamento de arquivo de configuração" -ForegroundColor Cyan
+Write-Host "📋 Teste 5: Carregamento de arquivo de configuração" -ForegroundColor Cyan
 
 $configContent = @"
-repo_url: "https://example.com/svn"
-default_branch: "trunk"
+urlA: "https://invalid.example.com/svn/branchA"
+urlB: "https://invalid.example.com/svn/branchB"
+revsA: ["123"]
+revsB: ["124"]
+output: "list"
+summarize: true
 "@
 
 $configContent | Out-File -FilePath "test-config.yaml" -Encoding UTF8
 
-$output = & .\build\svndiff.exe compare --config test-config.yaml --branch1 "branch1" --branch2 "branch2" 2>&1
+$output = & .\build\svndiff.exe --config test-config.yaml 2>&1
 if ($LASTEXITCODE -ne 0 -and $output -match "erro|falha|conectar") {
     Write-Host "✅ Carregamento de arquivo de configuração funcionou" -ForegroundColor Green
 } else {
@@ -103,5 +120,6 @@ Write-Host "🎉 Todos os testes de integração passaram!" -ForegroundColor Gre
 Write-Host "📋 Resumo dos testes:" -ForegroundColor Cyan
 Write-Host "  ✅ Comando de ajuda" -ForegroundColor Green
 Write-Host "  ✅ Comando de versão" -ForegroundColor Green
+Write-Host "  ✅ Validação de configuração" -ForegroundColor Green
 Write-Host "  ✅ Tratamento de erro de conectividade" -ForegroundColor Green
 Write-Host "  ✅ Carregamento de arquivo de configuração" -ForegroundColor Green
