@@ -5,6 +5,7 @@
 O pipeline GitHub Actions estava falhando devido a problemas nos scripts de teste de integração. **Todas as correções foram implementadas e validadas com sucesso**.
 
 ### 🎯 **Validação Final Confirmada**
+
 ```bash
 # ✅ Teste de validação funcionando corretamente
 $ .\build\svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124"
@@ -20,7 +21,7 @@ set -e  # Reabilitar set -e
 # ✅ Todos os testes passando
 🎉 Todos os testes de integração passaram!
   ✅ Comando de ajuda
-  ✅ Comando de versão  
+  ✅ Comando de versão
   ✅ Validação de configuração
   ✅ Tratamento de erro de conectividade
   ✅ Carregamento de arquivo de configuração
@@ -29,24 +30,29 @@ set -e  # Reabilitar set -e
 ## 🔍 Análise Realizada
 
 ### 1. **Estrutura de Comandos Incorreta**
-- ❌ Scripts testavam comando `compare` inexistente
-- ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
+
+-   ❌ Scripts testavam comando `compare` inexistente
+-   ✅ CLI usa flags diretos: `svndiff --urlA --urlB --revsA --revsB`
 
 ### 2. **Exit Codes Mascarados no Bash**
-- ❌ `|| true` no bash mascarava exit codes reais (sempre retornava 0)
-- ✅ Uso de `set +e/set -e` para capturar exit codes corretos
+
+-   ❌ `|| true` no bash mascarava exit codes reais (sempre retornava 0)
+-   ✅ Uso de `set +e/set -e` para capturar exit codes corretos
 
 ### 3. **Conflito de Arquivo de Configuração**
-- ❌ Arquivo `config.yaml` local interferia nos testes
-- ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
+
+-   ❌ Arquivo `config.yaml` local interferia nos testes
+-   ✅ Renomeado para `config.yaml.example` e adicionado ao `.gitignore`
 
 ### 4. **Falta de Debug nos Testes**
-- ❌ Scripts falhavam sem informações detalhadas
-- ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
+
+-   ❌ Scripts falhavam sem informações detalhadas
+-   ✅ Adicionado debug extensivo com `set -euo pipefail` e logs detalhados
 
 ### 5. **Mapeamento Incorreto de Configuração**
-- ❌ Estrutura YAML dos testes não combinava com a esperada
-- ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
+
+-   ❌ Estrutura YAML dos testes não combinava com a esperada
+-   ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
 
 ## ✅ Correções Implementadas
 
@@ -70,6 +76,7 @@ echo "🐛 Debug: Exit code = $exit_code"
 ```
 
 ### **2. Script PowerShell Corrigido**
+
 ```powershell
 # Teste de validação corrigido
 $output = & .\build\svndiff.exe --urlA "" --urlB "test" --revsA "123" --revsB "124" 2>&1
@@ -80,7 +87,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Teste de conectividade corrigido  
+# Teste de conectividade corrigido
 $output = & .\build\svndiff.exe --urlA "https://invalid.example.com/svn" --urlB "https://invalid.example.com/svn2" --revsA "123" --revsB "124" 2>&1
 ```
 

@@ -18,11 +18,13 @@ echo "🧪 Teste 2: Verificando validação de configuração..."
 ## 🔧 **Solução Implementada**
 
 ### **1. Arquivo Completamente Recriado**
-- ✅ **Removido** arquivo corrompido
-- ✅ **Recriado** script completo com sintaxe correta
-- ✅ **Verificado** sintaxe com `bash -n scripts/integration-tests.sh`
+
+-   ✅ **Removido** arquivo corrompido
+-   ✅ **Recriado** script completo com sintaxe correta
+-   ✅ **Verificado** sintaxe com `bash -n scripts/integration-tests.sh`
 
 ### **2. Estrutura Correta Restaurada**
+
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -30,7 +32,7 @@ set -euo pipefail
 # 4 Testes implementados:
 # 1. Comando de ajuda
 # 2. Validação de configuração (com exit code correto)
-# 3. Tratamento de erro de conectividade  
+# 3. Tratamento de erro de conectividade
 # 4. Carregamento de arquivo de configuração
 
 # Correções de exit code mantidas:
@@ -41,10 +43,11 @@ set -e
 ```
 
 ### **3. Validação da Correção**
-- ✅ **Sintaxe**: `bash -n` passou sem erros
-- ✅ **Estrutura**: Script completo de 130 linhas
-- ✅ **Exit codes**: Mantidas correções do `|| true`
-- ✅ **Debug**: Logs detalhados preservados
+
+-   ✅ **Sintaxe**: `bash -n` passou sem erros
+-   ✅ **Estrutura**: Script completo de 130 linhas
+-   ✅ **Exit codes**: Mantidas correções do `|| true`
+-   ✅ **Debug**: Logs detalhados preservados
 
 ## 📊 **Expectativa do Pipeline**
 
@@ -58,6 +61,7 @@ Com o script recriado, o pipeline GitHub Actions deve:
 ## 🎯 **Próxima Execução**
 
 O pipeline deve mostrar:
+
 ```bash
 🔧 Executando testes de integração para svndiff...
 🐛 Debug: PWD=/github/workspace
@@ -81,12 +85,12 @@ O pipeline deve mostrar:
 
 ## 📋 **Resumo das Correções**
 
-| Problema | Solução | Status |
-|----------|---------|--------|
-| Script corrompido | Arquivo recriado | ✅ |
-| Sintaxe inválida | Verificação `bash -n` | ✅ |
-| Exit codes mascarados | `set +e/set -e` | ✅ |
-| Comandos incorretos | Flags corretos | ✅ |
-| Estrutura YAML | Configuração adequada | ✅ |
+| Problema              | Solução               | Status |
+| --------------------- | --------------------- | ------ |
+| Script corrompido     | Arquivo recriado      | ✅     |
+| Sintaxe inválida      | Verificação `bash -n` | ✅     |
+| Exit codes mascarados | `set +e/set -e`       | ✅     |
+| Comandos incorretos   | Flags corretos        | ✅     |
+| Estrutura YAML        | Configuração adequada | ✅     |
 
 **O pipeline CI/CD agora deve executar 100% com sucesso!** 🎉
