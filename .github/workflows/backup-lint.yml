@@ -1,0 +1,29 @@
+# Backup step para substituir golangci-lint se necessário
+# Substitua o step "Instalar golangci-lint" por estes steps caso o problema persista:
+
+# - name: Executar go fmt
+#   run: |
+#     if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+#       echo "Código não está formatado corretamente:"
+#       gofmt -s -l .
+#       echo "Execute: go fmt ./..."
+#       exit 1
+#     fi
+
+# - name: Executar go vet
+#   run: go vet ./...
+
+# - name: Executar staticcheck
+#   run: |
+#     go install honnef.co/go/tools/cmd/staticcheck@latest
+#     staticcheck ./...
+
+# - name: Executar ineffassign
+#   run: |
+#     go install github.com/gordonklaus/ineffassign@latest
+#     ineffassign ./...
+
+# - name: Executar misspell
+#   run: |
+#     go install github.com/client9/misspell/cmd/misspell@latest
+#     misspell -error .
