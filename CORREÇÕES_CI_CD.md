@@ -140,18 +140,19 @@ docker:
 ```
 
 ### **5. Actions GitHub Atualizadas**
+
 ```yaml
 # ❌ ANTES - Actions deprecadas (removidas em abril 2024)
 - name: Upload artefatos
   uses: actions/upload-artifact@v3
-  
-- name: Download todos os artefatos  
+
+- name: Download todos os artefatos
   uses: actions/download-artifact@v3
 
 # ✅ DEPOIS - Actions atuais e suportadas
 - name: Upload artefatos
   uses: actions/upload-artifact@v4
-  
+
 - name: Download todos os artefatos
   uses: actions/download-artifact@v4
 ```
