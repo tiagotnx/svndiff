@@ -24,8 +24,8 @@ all: clean lint test build
 build:
 	@echo "Compilando $(BINARY_NAME)..."
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
-	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PATH)
-	@echo "✓ Compilação concluída: $(BUILD_DIR)/$(BINARY_NAME)"
+	@go build -o $(BUILD_DIR)/$(BINARY_NAME).exe $(MAIN_PATH)
+	@echo "✓ Compilação concluída: $(BUILD_DIR)/$(BINARY_NAME).exe"
 
 # Compilar para múltiplas plataformas
 build-all:
