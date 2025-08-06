@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"svndiff/internal/svn"
-	"svndiff/pkg/config"
 
 	"github.com/fatih/color"
+
+	"svndiff/internal/svn"
+	"svndiff/pkg/config"
 )
 
 // Differ é a estrutura principal que orquestra as operações de diff

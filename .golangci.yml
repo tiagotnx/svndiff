@@ -15,15 +15,18 @@ linters:
         - staticcheck
         - ineffassign
         - typecheck
-        - misspell
         - unconvert
         - gofumpt
+    
+    disable:
+        - misspell  # Desabilitado por causa de comentários em português
 
 linters-settings:
     govet:
         enable-all: true
         disable:
             - shadow
+            - fieldalignment  # Desabilitado - otimização desnecessária
     gofmt:
         simplify: true
     goimports:

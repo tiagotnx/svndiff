@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"svndiff/internal/app"
-	"svndiff/pkg/config"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"svndiff/internal/app"
+	"svndiff/pkg/config"
 )
 
 var (
@@ -88,14 +89,14 @@ func init() {
 	rootCmd.PersistentFlags().Bool("summarize", true, "mostrar apenas resumo das diferenças")
 
 	// Vincula flags ao Viper
-	viper.BindPFlag("branchA.url", rootCmd.PersistentFlags().Lookup("urlA"))
-	viper.BindPFlag("branchA.revisions", rootCmd.PersistentFlags().Lookup("revsA"))
-	viper.BindPFlag("branchB.url", rootCmd.PersistentFlags().Lookup("urlB"))
-	viper.BindPFlag("branchB.revisions", rootCmd.PersistentFlags().Lookup("revsB"))
-	viper.BindPFlag("auth.user", rootCmd.PersistentFlags().Lookup("user"))
-	viper.BindPFlag("auth.password", rootCmd.PersistentFlags().Lookup("password"))
-	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
-	viper.BindPFlag("summarize", rootCmd.PersistentFlags().Lookup("summarize"))
+	_ = viper.BindPFlag("branchA.url", rootCmd.PersistentFlags().Lookup("urlA"))
+	_ = viper.BindPFlag("branchA.revisions", rootCmd.PersistentFlags().Lookup("revsA"))
+	_ = viper.BindPFlag("branchB.url", rootCmd.PersistentFlags().Lookup("urlB"))
+	_ = viper.BindPFlag("branchB.revisions", rootCmd.PersistentFlags().Lookup("revsB"))
+	_ = viper.BindPFlag("auth.user", rootCmd.PersistentFlags().Lookup("user"))
+	_ = viper.BindPFlag("auth.password", rootCmd.PersistentFlags().Lookup("password"))
+	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
+	_ = viper.BindPFlag("summarize", rootCmd.PersistentFlags().Lookup("summarize"))
 }
 
 // initConfig lê o arquivo de configuração e variáveis de ambiente

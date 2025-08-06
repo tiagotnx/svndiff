@@ -1,8 +1,9 @@
 package app
 
 import (
-	"svndiff/pkg/config"
 	"testing"
+
+	"svndiff/pkg/config"
 )
 
 func TestDiffer_parseFileChanges(t *testing.T) {
@@ -95,6 +96,7 @@ func TestNewDiffer(t *testing.T) {
 
 	if differ == nil {
 		t.Error("NewDiffer() returned nil")
+		return // Return early to avoid nil pointer dereference
 	}
 
 	if differ.config != cfg {
