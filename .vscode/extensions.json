@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "golang.go",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.makefile-tools",
+    "streetsidesoftware.code-spell-checker",
+    "eamodio.gitlens",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer",
+    "golang.go-nightly",
+    "ms-vscode.vscode-github-issue-notebooks",
+    "github.vscode-pull-request-github",
+    "ms-vscode.remote-containers",
+    "ms-azuretools.vscode-docker"
+  ]
+}

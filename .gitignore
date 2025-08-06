@@ -1,6 +1,4 @@
 # Binaries for programs and plugins
-*.exe
-*.exe~
 *.dll
 *.so
 *.dylib
@@ -16,10 +14,6 @@
 
 # Go workspace file
 go.work
-
-# IDE
-.vscode/
-.idea/
 
 # OS
 .DS_Store
