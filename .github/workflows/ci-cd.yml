@@ -9,7 +9,7 @@ on:
 
 env:
     GO_VERSION: '1.22'
-    GOLANGCI_LINT_VERSION: 'v1.61.0'
+    GOLANGCI_LINT_VERSION: 'v1.63.4'
 
 jobs:
     # Job de Lint e Testes
@@ -56,10 +56,10 @@ jobs:
               run: go vet ./...
 
             - name: Instalar golangci-lint
-              uses: golangci/golangci-lint-action@v3
+              uses: golangci/golangci-lint-action@v6
               with:
                   version: ${{ env.GOLANGCI_LINT_VERSION }}
-                  args: --timeout=5m
+                  args: --timeout=10m --config=.golangci.yml
 
             - name: Executar testes unitários
               run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...

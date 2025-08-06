@@ -1,0 +1,47 @@
+run:
+  timeout: 10m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - vendor
+    - tmp
+
+output:
+  formats:
+    - format: colored-line-number
+      path: stdout
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - typecheck
+    - misspell
+    - unconvert
+    - gofumpt
+  
+  disable-all: false
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - shadow
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: svndiff
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  
+  exclude-rules:
+    # Exclude some lints for test files
+    - path: _test\.go
+      linters:
+        - errcheck
