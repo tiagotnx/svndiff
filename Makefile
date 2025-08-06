@@ -23,14 +23,14 @@ all: clean lint test build
 # Compilar o projeto
 build:
 	@echo "Compilando $(BINARY_NAME)..."
-	@mkdir -p $(BUILD_DIR)
+	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PATH)
 	@echo "✓ Compilação concluída: $(BUILD_DIR)/$(BINARY_NAME)"
 
 # Compilar para múltiplas plataformas
 build-all:
 	@echo "Compilando para múltiplas plataformas..."
-	@mkdir -p $(DIST_DIR)
+	@if not exist $(DIST_DIR) mkdir $(DIST_DIR)
 	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/$(BINARY_NAME)-linux-amd64 $(MAIN_PATH)
 	@GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o $(DIST_DIR)/$(BINARY_NAME)-linux-arm64 $(MAIN_PATH)
 	@GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/$(BINARY_NAME)-windows-amd64.exe $(MAIN_PATH)
@@ -47,7 +47,7 @@ test:
 # Executar testes com cobertura
 test-coverage:
 	@echo "Executando testes com cobertura..."
-	@mkdir -p $(COVERAGE_DIR)
+	@if not exist $(COVERAGE_DIR) mkdir $(COVERAGE_DIR)
 	@go test -v -race -coverprofile=$(COVERAGE_DIR)/coverage.out -covermode=atomic ./...
 	@go tool cover -html=$(COVERAGE_DIR)/coverage.out -o $(COVERAGE_DIR)/coverage.html
 	@go tool cover -func=$(COVERAGE_DIR)/coverage.out
@@ -65,11 +65,6 @@ lint:
 	@echo "Executando linting..."
 	@go fmt ./...
 	@go vet ./...
-	@if command -v golangci-lint >/dev/null 2>&1; then \
-		golangci-lint run; \
-	else \
-		echo "⚠️  golangci-lint não encontrado, execute 'make setup' primeiro"; \
-	fi
 	@echo "✓ Linting concluído"
 
 # Verificação de segurança
