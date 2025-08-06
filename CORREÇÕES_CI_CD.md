@@ -59,12 +59,12 @@ set -e  # Reabilitar set -e
 -   ❌ Pipeline falhava no login Docker: "Username and password required"
 -   ✅ Job Docker tornado condicional baseado na existência dos secrets
 
-### 7. **Actions Deprecadas**
+### 7. **Sintaxe de Secrets Inválida**
 
--   ❌ Uso de `actions/upload-artifact@v3` e `actions/download-artifact@v3` (deprecadas)
--   ✅ Atualizadas para `@v4` (suportadas pelo GitHub)
+-   ❌ Uso de `secrets.DOCKER_USERNAME` em condição `if` de job
+-   ✅ Condições `if` movidas para steps individuais que precisam dos secrets
 
-## ✅ Correções Implementadas
+### 8. **Estrutura YAML Correta**
 
 ### **1. Script Bash (`integration-tests.sh`)**
 
@@ -168,6 +168,26 @@ branchA:
 # Depois (correto)
 urlA: '...'
 revsA: ['123']
+```
+
+### **7. Correção de Sintaxe de Secrets**
+
+```yaml
+# ❌ ANTES - Sintaxe inválida para secrets em condição if de job
+docker:
+    if: github.event_name != 'pull_request' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+
+# ✅ DEPOIS - Condições if nos steps específicos
+docker:
+    if: github.event_name != 'pull_request'
+    steps:
+        - name: Login no Docker Hub
+          if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
+          uses: docker/login-action@v3
+        
+        - name: Build e push imagem Docker
+          if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
+          uses: docker/build-push-action@v5
 ```
 
 ## 🧪 Validação das Correções
