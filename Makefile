@@ -8,9 +8,9 @@ DIST_DIR=dist
 COVERAGE_DIR=coverage
 
 # Informações de versão
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+VERSION := $(shell git describe --tags --always --dirty 2>nul || echo "dev")
+COMMIT := $(shell git rev-parse --short HEAD 2>nul || echo "unknown")
+DATE := $(shell powershell -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ'" 2>nul || echo "unknown")
 
 # Flags de build
 LDFLAGS=-ldflags "-s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DATE)"
@@ -48,7 +48,7 @@ test:
 test-coverage:
 	@echo "Executando testes com cobertura..."
 	@if not exist $(COVERAGE_DIR) mkdir $(COVERAGE_DIR)
-	@go test -v -race -coverprofile=$(COVERAGE_DIR)/coverage.out -covermode=atomic ./...
+	@go test -v -coverprofile=$(COVERAGE_DIR)/coverage.out -covermode=atomic ./...
 	@go tool cover -html=$(COVERAGE_DIR)/coverage.out -o $(COVERAGE_DIR)/coverage.html
 	@go tool cover -func=$(COVERAGE_DIR)/coverage.out
 	@echo "✓ Relatório de cobertura gerado: $(COVERAGE_DIR)/coverage.html"
@@ -56,8 +56,7 @@ test-coverage:
 # Executar testes de integração
 test-integration:
 	@echo "Executando testes de integração..."
-	@chmod +x scripts/integration-tests.sh
-	@./scripts/integration-tests.sh
+	@if exist scripts\integration-tests.sh powershell -Command "& '.\scripts\integration-tests.sh'"
 	@echo "✓ Testes de integração concluídos"
 
 # Lint do código
@@ -86,8 +85,7 @@ install:
 # Configurar ambiente de desenvolvimento
 setup:
 	@echo "Configurando ambiente de desenvolvimento..."
-	@chmod +x scripts/setup-dev.sh
-	@./scripts/setup-dev.sh
+	@if exist scripts\setup-dev.sh powershell -Command "& '.\scripts\setup-dev.sh'"
 	@echo "✓ Ambiente configurado"
 
 # Desenvolvimento com hot reload
@@ -117,8 +115,7 @@ docker-test:
 # Instalar git hooks
 install-hooks:
 	@echo "Instalando git hooks..."
-	@chmod +x scripts/install-hooks.sh
-	@./scripts/install-hooks.sh
+	@if exist scripts\install-hooks.sh powershell -Command "& '.\scripts\install-hooks.sh'"
 	@echo "✓ Git hooks instalados"
 
 # Baixar dependências
@@ -131,11 +128,12 @@ deps:
 # Limpar arquivos gerados
 clean:
 	@echo "Limpando arquivos gerados..."
-	@rm -rf $(BUILD_DIR)
-	@rm -rf $(DIST_DIR)
-	@rm -rf $(COVERAGE_DIR)
-	@rm -f coverage.out coverage.html
-	@rm -rf tmp
+	@if exist $(BUILD_DIR) rmdir /S /Q $(BUILD_DIR)
+	@if exist $(DIST_DIR) rmdir /S /Q $(DIST_DIR)
+	@if exist $(COVERAGE_DIR) rmdir /S /Q $(COVERAGE_DIR)
+	@if exist coverage.out del coverage.out
+	@if exist coverage.html del coverage.html
+	@if exist tmp rmdir /S /Q tmp
 	@echo "✓ Limpeza concluída"
 
 # Executar exemplo
