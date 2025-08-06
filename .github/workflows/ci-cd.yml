@@ -71,6 +71,9 @@ jobs:
                   flags: unittests
                   name: codecov-umbrella
 
+            - name: Install SVN
+              run: sudo apt-get update && sudo apt-get install -y subversion
+
             - name: Executar testes de integração
               run: |
                   chmod +x scripts/integration-tests.sh
