@@ -76,7 +76,11 @@ jobs:
 
             - name: Executar testes de integração
               run: |
+                  set -x
+                  echo "📋 Preparando testes de integração..."
+                  ls -la scripts/
                   chmod +x scripts/integration-tests.sh
+                  echo "📋 Executando testes..."
                   ./scripts/integration-tests.sh
 
     # Job de Build Multi-plataforma
