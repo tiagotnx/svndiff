@@ -63,6 +63,7 @@ test-integration:
 lint:
 	@echo "Executando linting..."
 	@go fmt ./...
+	@gofumpt -w .
 	@go vet ./...
 	@echo "✓ Linting concluído"
 
