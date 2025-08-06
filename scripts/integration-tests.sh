@@ -1,7 +1,27 @@
 #!/bin/bash
 
-# Script para executar testes de integração
-# Uso: ./scripts/integration-tests.sh
+# Script para executar testes de integ# Teste 2: Verificar validação de configuração
+echo
+echo "🧪 Teste 2: Verificando validação de configuração..."
+echo "🐛 Debug: Testando com argumentos inválidos..."
+
+# Teste com argumentos inválidos (URL vazia)
+set +e  # Temporariamente desabilitar set -e para capturar exit code
+./build/svndiff --urlA "" --urlB "test" --revsA "123" --revsB "124" > /tmp/test_output 2>&1
+exit_code=$?
+output=$(cat /tmp/test_output)
+set -e  # Reabilitar set -e
+
+echo "🐛 Debug: Exit code = $exit_code"
+echo "🐛 Debug: Output = $output"
+
+if [ $exit_code -ne 0 ]; then
+    echo "✅ Validação de configuração funciona corretamente"
+else
+    echo "❌ Validação de configuração falhou - deveria ter retornado erro"
+    echo "Saída completa: $output"
+    exit 1
+fipts/integration-tests.sh
 
 set -euo pipefail
 
@@ -74,8 +94,11 @@ echo
 echo "🧪 Teste 3: Verificando formato JSON com URLs inválidas..."
 echo "🐛 Debug: Testando conectividade com URLs inválidas..."
 
-output=$(./build/svndiff --urlA "https://invalid.example.com/svn" --urlB "https://invalid.example.com/svn2" --revsA "123" --revsB "124" --output json 2>&1 || true)
+set +e  # Temporariamente desabilitar set -e para capturar exit code
+./build/svndiff --urlA "https://invalid.example.com/svn" --urlB "https://invalid.example.com/svn2" --revsA "123" --revsB "124" --output json > /tmp/test_output3 2>&1
 exit_code=$?
+output=$(cat /tmp/test_output3)
+set -e  # Reabilitar set -e
 
 echo "🐛 Debug: Exit code = $exit_code"
 echo "🐛 Debug: Output snippet = ${output:0:200}..."
@@ -106,8 +129,11 @@ EOF
 echo "🐛 Debug: Conteúdo do arquivo de configuração:"
 cat test-config.yaml
 
-output=$(./build/svndiff --config test-config.yaml 2>&1 || true)
+set +e  # Temporariamente desabilitar set -e para capturar exit code
+./build/svndiff --config test-config.yaml > /tmp/test_output4 2>&1
 exit_code=$?
+output=$(cat /tmp/test_output4)
+set -e  # Reabilitar set -e
 
 echo "🐛 Debug: Exit code = $exit_code"
 echo "🐛 Debug: Output snippet = ${output:0:200}..."
@@ -125,6 +151,7 @@ fi
 
 # Limpeza
 rm -f test-config.yaml
+rm -f /tmp/test_output /tmp/test_output3 /tmp/test_output4
 
 echo
 echo "🎉 Todos os testes de integração passaram!"
