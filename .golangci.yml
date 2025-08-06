@@ -4,9 +4,7 @@ run:
   tests: true
 
 output:
-  formats:
-    - format: colored-line-number
-      path: stdout
+  format: colored-line-number
 
 linters:
   enable:
@@ -20,8 +18,6 @@ linters:
     - misspell
     - unconvert
     - gofumpt
-  
-  disable-all: false
 
 linters-settings:
   govet:
@@ -42,7 +38,6 @@ issues:
     - tmp
   
   exclude-rules:
-    # Exclude some lints for test files
     - path: _test\.go
       linters:
         - errcheck
