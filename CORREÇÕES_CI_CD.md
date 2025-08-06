@@ -54,6 +54,11 @@ set -e  # Reabilitar set -e
 -   ❌ Estrutura YAML dos testes não combinava com a esperada
 -   ✅ Corrigido para usar `urlA`/`urlB` que mapeia para `branchA.url`/`branchB.url`
 
+### 6. **Secrets Docker Ausentes**
+
+-   ❌ Pipeline falhava no login Docker: "Username and password required"
+-   ✅ Job Docker tornado condicional baseado na existência dos secrets
+
 ## ✅ Correções Implementadas
 
 ### **1. Script Bash (`integration-tests.sh`)**
@@ -110,7 +115,25 @@ $output = & .\build\svndiff.exe --urlA "https://invalid.example.com/svn" --urlB 
 -   **Gitignore atualizado**: `config.yaml` ignorado para evitar conflitos
 -   **Isolamento de testes**: Testes não dependem de arquivos locais
 
-### **4. Estrutura YAML Correta**
+### **4. Job Docker Condicional**
+```yaml
+# Job Docker tornado condicional para evitar falhas por secrets ausentes
+docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    # ✅ Só executa se os secrets existirem
+    if: github.event_name != 'pull_request' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+    
+    steps:
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+```
+
+### **5. Estrutura YAML Correta**
 
 ```yaml
 # Antes (incorreto)
@@ -178,7 +201,23 @@ O pipeline CI/CD agora deve executar com sucesso, fornecendo:
 
 1. **Monitorar execução** do pipeline GitHub Actions
 2. **Verificar logs** detalhados se houver falhas
-3. **Ajustar timeouts** se necessário para SVN
-4. **Otimizar performance** dos testes se possível
+3. **Configurar secrets Docker** (opcional):
+   - Ir para Repositório → Settings → Secrets and variables → Actions
+   - Adicionar `DOCKER_USERNAME` com seu usuário Docker Hub
+   - Adicionar `DOCKER_PASSWORD` com sua senha/token Docker Hub
+4. **Ajustar timeouts** se necessário para SVN
+5. **Otimizar performance** dos testes se possível
+
+### 📋 **Configuração de Secrets Docker (Opcional)**
+
+Para habilitar o build e push de imagens Docker:
+
+```bash
+# No GitHub: Repositório → Settings → Secrets and variables → Actions
+DOCKER_USERNAME=seu_usuario_dockerhub
+DOCKER_PASSWORD=seu_token_dockerhub
+```
+
+**Nota**: Se os secrets não estiverem configurados, o job Docker será pulado automaticamente sem causar falhas no pipeline.
 
 **Status**: ✅ **Correções implementadas e validadas localmente**
